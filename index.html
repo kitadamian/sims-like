@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sims-like: Gra Życiowa (Tryb Ciemny)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #6b8cff;        /* jaśniejszy niebieski */
+            --secondary: #ffb347;      /* jasny pomarańcz */
+            --accent: #9f8be5;          /* jasny fiolet */
+            --light: #2d2d3a;           /* ciemne tło paneli */
+            --dark: #f0f0f0;             /* jasny tekst */
+            --success: #4caf7a;          /* ciemniejsza zieleń */
+            --warning: #ffb74d;          /* pomarańcz */
+            --danger: #ff6b6b;            /* czerwony */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0f1a, #1a2634);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: var(--primary);
+        }
+        
+        .game-description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 992px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .main-game {
+            background-color: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            min-height: 500px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #444;
+        }
+        
+        .character-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #1e1e2a, #2a2a3a);
+            border: 1px solid #3a3a4a;
+        }
+        
+        .character {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character i {
+            font-size: 60px;
+            color: white;
+        }
+        
+        .character-status {
+            position: absolute;
+            bottom: -5px;
+            width: 100%;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .house-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .house-area {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .room {
+            height: 120px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        .room:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .room i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .room-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .living-room {
+            background: linear-gradient(135deg, #d96c4a, #b85a3a);
+        }
+        
+        .kitchen {
+            background: linear-gradient(135deg, #3b7a57, #2a5f3a);
+        }
+        
+        .bedroom {
+            background: linear-gradient(135deg, #3a6ea5, #1e4a7a);
+        }
+        
+        .bathroom {
+            background: linear-gradient(135deg, #2b7a8a, #1b5e6b);
+        }
+        
+        .garden {
+            background: linear-gradient(135deg, #5f8b4c, #3e6b2f);
+        }
+        
+        .garage {
+            background: linear-gradient(135deg, #6b4f3a, #4e3a2a);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            border: 1px solid #555;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: #1a1a1a;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .stats-panel {
+            background-color: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            backdrop-filter: blur(5px);
+            border: 1px solid #444;
+        }
+        
+        .stats-panel h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .stat-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ccc;
+        }
+        
+        .stat-bar {
+            height: 10px;
+            width: 100%;
+            background-color: #3a3a4a;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .stat-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .hunger-fill {
+            background-color: var(--success);
+        }
+        
+        .energy-fill {
+            background-color: var(--primary);
+        }
+        
+        .happiness-fill {
+            background-color: var(--secondary);
+        }
+        
+        .hygiene-fill {
+            background-color: var(--accent);
+        }
+        
+        .finance-fill {
+            background-color: #4aa0b5;
+        }
+        
+        .inventory {
+            margin-top: 30px;
+        }
+        
+        .inventory h3 {
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .inventory-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background-color: #2a2a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid #444;
+        }
+        
+        .inventory-item i {
+            font-size: 24px;
+            color: #ccc;
+        }
+        
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .audio-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(20, 20, 30, 0.8);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+        
+        .audio-btn:hover {
+            background-color: var(--primary);
+            color: #1a1a1a;
+            transform: scale(1.1);
+        }
+        
+        .author-info {
+            background-color: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px);
+            border: 1px solid #444;
+        }
+        
+        .author-info h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .author-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .author-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: #1a1a1a;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid #555;
+        }
+        
+        .author-link:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #2a2a3a;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+            max-width: 300px;
+            border: 1px solid #444;
+            color: var(--dark);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification i {
+            font-size: 24px;
+        }
+        
+        .notification-success i {
+            color: var(--success);
+        }
+        
+        .notification-warning i {
+            color: var(--warning);
+        }
+        
+        .notification-info i {
+            color: var(--primary);
+        }
+        
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .mobile-btn {
+            padding: 15px;
+            border-radius: 10px;
+            background-color: var(--primary);
+            color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            border: 1px solid #555;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-area {
+                gap: 15px;
+            }
+            
+            .room {
+                height: 100px;
+            }
+            
+            .mobile-controls {
+                display: grid;
+            }
+            
+            .controls {
+                display: none;
+            }
+        }
+        
+        .game-time {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ccc;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .finance-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .action-log {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1e1e2a;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #3a3a4a;
+        }
+        
+        .action-log h3 {
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px dashed #444;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .log-entry i {
+            margin-right: 5px;
+            width: 20px;
+        }
+
+        #character-name {
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-home"></i> Sims-like: Gra Życiowa</h1>
+            <p class="game-description">
+                Zarządzaj swoją postacią, zaspokajaj jej potrzeby, rozbudowuj dom i ciesz się życiem wirtualnego Sima!
+                Gra działa na komputerach i urządzeniach mobilnych. Domyślnie tryb ciemny.
+            </p>
+        </header>
+        
+        <div class="game-area">
+            <div class="main-game">
+                <div class="game-time">
+                    <i class="fas fa-clock"></i> Czas gry: <span id="game-time">08:00</span>
+                </div>
+                
+                <div class="character-area">
+                    <div class="character">
+                        <i class="fas fa-user"></i>
+                        <div class="character-status" id="character-status">Szczęśliwy</div>
+                    </div>
+                    <h2 id="character-name">Sim</h2>
+                    <div class="finance-display">
+                        <i class="fas fa-coins"></i> <span id="money">1500</span> monet
+                    </div>
+                </div>
+                
+                <div class="house-area">
+                    <div class="room living-room" data-room="living-room">
+                        <i class="fas fa-couch"></i>
+                        <span>Salon</span>
+                        <div class="room-level">Lvl <span id="living-room-lvl">1</span></div>
+                    </div>
+                    
+                    <div class="room kitchen" data-room="kitchen">
+                        <i class="fas fa-utensils"></i>
+                        <span>Kuchnia</span>
+                        <div class="room-level">Lvl <span id="kitchen-lvl">1</span></div>
+                    </div>
+                    
+                    <div class="room bedroom" data-room="bedroom">
+                        <i class="fas fa-bed"></i>
+                        <span>Sypialnia</span>
+                        <div class="room-level">Lvl <span id="bedroom-lvl">1</span></div>
+                    </div>
+                    
+                    <div class="room bathroom" data-room="bathroom">
+                        <i class="fas fa-bath"></i>
+                        <span>Łazienka</span>
+                        <div class="room-level">Lvl <span id="bathroom-lvl">1</span></div>
+                    </div>
+                    
+                    <div class="room garden" data-room="garden">
+                        <i class="fas fa-tree"></i>
+                        <span>Ogród</span>
+                        <div class="room-level">Lvl <span id="garden-lvl">1</span></div>
+                    </div>
+                    
+                    <div class="room garage" data-room="garage">
+                        <i class="fas fa-car"></i>
+                        <span>Garaż</span>
+                        <div class="room-level">Lvl <span id="garage-lvl">1</span></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="eat-btn">
+                        <i class="fas fa-utensils"></i> Jeść
+                    </button>
+                    <button class="btn btn-primary" id="sleep-btn">
+                        <i class="fas fa-bed"></i> Spać
+                    </button>
+                    <button class="btn btn-primary" id="shower-btn">
+                        <i class="fas fa-shower"></i> Prysznic
+                    </button>
+                    <button class="btn btn-secondary" id="work-btn">
+                        <i class="fas fa-briefcase"></i> Pracuj
+                    </button>
+                    <button class="btn btn-secondary" id="play-btn">
+                        <i class="fas fa-gamepad"></i> Baw się
+                    </button>
+                    <button class="btn btn-success" id="upgrade-btn">
+                        <i class="fas fa-tools"></i> Ulepsz dom
+                    </button>
+                </div>
+                
+                <div class="mobile-controls">
+                    <div class="mobile-btn" id="mobile-eat">
+                        <i class="fas fa-utensils"></i>
+                        <span>Jeść</span>
+                    </div>
+                    <div class="mobile-btn" id="mobile-sleep">
+                        <i class="fas fa-bed"></i>
+                        <span>Spać</span>
+                    </div>
+                    <div class="mobile-btn" id="mobile-shower">
+                        <i class="fas fa-shower"></i>
+                        <span>Prysznic</span>
+                    </div>
+                    <div class="mobile-btn" id="mobile-work">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Pracuj</span>
+                    </div>
+                    <div class="mobile-btn" id="mobile-play">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Baw się</span>
+                    </div>
+                    <div class="mobile-btn" id="mobile-upgrade">
+                        <i class="fas fa-tools"></i>
+                        <span>Ulepsz</span>
+                    </div>
+                </div>
+                
+                <div class="action-log">
+                    <h3><i class="fas fa-scroll"></i> Dziennik aktywności</h3>
+                    <div id="log-container">
+                        <div class="log-entry"><i class="fas fa-info-circle"></i> Witaj w grze! Zaczynamy nowy dzień.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-panel">
+                <h2><i class="fas fa-chart-line"></i> Statystyki Sima</h2>
+                
+                <div class="stat">
+                    <div class="stat-name">
+                        <i class="fas fa-hamburger"></i>
+                        <span>Głód</span>
+                    </div>
+                    <div>
+                        <span id="hunger-value">80</span>%
+                        <div class="stat-bar">
+                            <div class="stat-fill hunger-fill" id="hunger-bar" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat">
+                    <div class="stat-name">
+                        <i class="fas fa-battery-full"></i>
+                        <span>Energia</span>
+                    </div>
+                    <div>
+                        <span id="energy-value">90</span>%
+                        <div class="stat-bar">
+                            <div class="stat-fill energy-fill" id="energy-bar" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat">
+                    <div class="stat-name">
+                        <i class="fas fa-smile"></i>
+                        <span>Szczęście</span>
+                    </div>
+                    <div>
+                        <span id="happiness-value">75</span>%
+                        <div class="stat-bar">
+                            <div class="stat-fill happiness-fill" id="happiness-bar" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat">
+                    <div class="stat-name">
+                        <i class="fas fa-soap"></i>
+                        <span>Higiena</span>
+                    </div>
+                    <div>
+                        <span id="hygiene-value">85</span>%
+                        <div class="stat-bar">
+                            <div class="stat-fill hygiene-fill" id="hygiene-bar" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat">
+                    <div class="stat-name">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Finanse</span>
+                    </div>
+                    <div>
+                        <span id="finance-value">60</span>%
+                        <div class="stat-bar">
+                            <div class="stat-fill finance-fill" id="finance-bar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="inventory">
+                    <h3><i class="fas fa-box-open"></i> Ekwipunek</h3>
+                    <div class="inventory-items">
+                        <div class="inventory-item" title="Jedzenie">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="inventory-item" title="Piłka">
+                            <i class="fas fa-basketball-ball"></i>
+                        </div>
+                        <div class="inventory-item" title="Książka">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="inventory-item" title="Telewizor">
+                            <i class="fas fa-tv"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="audio-controls">
+            <div class="audio-btn" id="music-toggle" title="Włącz/Wyłącz muzykę">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="audio-btn" id="sound-toggle" title="Włącz/Wyłącz dźwięki">
+                <i class="fas fa-volume-up"></i>
+            </div>
+        </div>
+        
+        <div class="author-info">
+            <h2><i class="fas fa-user"></i> Informacje o autorze</h2>
+            <p>Gra została stworzona przez <strong>Damiana Kitę</strong> jako demonstracja możliwości tworzenia responsywnych gier przeglądarkowych.</p>
+            <div class="author-links">
+                <a href="https://linktr.ee/kitadamian" target="_blank" class="author-link">
+                    <i class="fas fa-link"></i> Więcej projektów
+                </a>
+                <a href="https://github.com" target="_blank" class="author-link">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://linkedin.com" target="_blank" class="author-link">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div class="notification-content">Testowa wiadomość</div>
+    </div>
+    
+    <!-- Elementy audio dla dźwięków -->
+    <audio id="background-music" loop>
+        <!-- W rzeczywistej grze tutaj byłby plik audio -->
+        <!-- Używamy tu źródła zastępczego, ponieważ nie mamy prawdziwego pliku -->
+    </audio>
+    
+    <audio id="sound-effect">
+        <!-- Dźwięki efektów będą generowane przez Web Audio API -->
+    </audio>
+    
+    <script>
+        // Stan gry
+        const gameState = {
+            // Podstawowe statystyki
+            hunger: 80,
+            energy: 90,
+            happiness: 75,
+            hygiene: 85,
+            finance: 60,
+            money: 1500,
+            
+            // Poziomy pokoi
+            livingRoomLevel: 1,
+            kitchenLevel: 1,
+            bedroomLevel: 1,
+            bathroomLevel: 1,
+            gardenLevel: 1,
+            garageLevel: 1,
+            
+            // Czas gry
+            gameTime: 480, // 8:00 w minutach
+            gameSpeed: 1000, // 1 sekunda rzeczywista = 1 minuta gry
+            
+            // Statusy
+            isSleeping: false,
+            isWorking: false,
+            
+            // Audio
+            musicEnabled: true,
+            soundEnabled: true,
+            
+            // Dziennik
+            logEntries: ["Witaj w grze! Zaczynamy nowy dzień."]
+        };
+        
+        // Inicjalizacja gry
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicjalizacja elementów UI
+            updateUI();
+            
+            // Rozpocznij timer gry
+            startGameTimer();
+            
+            // Rozpocznij zmniejszanie statystyk
+            startStatsDecay();
+            
+            // Inicjalizacja audio
+            initAudio();
+            
+            // Inicjalizacja przycisków
+            initButtons();
+            
+            // Inicjalizacja pokoi
+            initRooms();
+        });
+        
+        // Funkcje gry
+        function startGameTimer() {
+            setInterval(() => {
+                if (!gameState.isSleeping) {
+                    gameState.gameTime += 1;
+                    
+                    // Zawinięcie czasu (24 godziny)
+                    if (gameState.gameTime >= 1440) {
+                        gameState.gameTime = 0;
+                    }
+                    
+                    updateGameTime();
+                }
+            }, gameState.gameSpeed);
+        }
+        
+        function startStatsDecay() {
+            setInterval(() => {
+                if (!gameState.isSleeping && !gameState.isWorking) {
+                    // Zmniejszanie statystyk w czasie
+                    gameState.hunger = Math.max(0, gameState.hunger - 0.5);
+                    gameState.energy = Math.max(0, gameState.energy - 0.3);
+                    gameState.happiness = Math.max(0, gameState.happiness - 0.2);
+                    gameState.hygiene = Math.max(0, gameState.hygiene - 0.1);
+                    
+                    updateUI();
+                    updateCharacterStatus();
+                }
+            }, 5000);
+        }
+        
+        function updateGameTime() {
+            const hours = Math.floor(gameState.gameTime / 60);
+            const minutes = gameState.gameTime % 60;
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('game-time').textContent = timeString;
+            
+            // Sprawdź, czy jest noc
+            const isNight = hours < 6 || hours >= 22;
+            
+            // Jeśli jest noc i postać nie śpi, zmniejsz energię szybciej
+            if (isNight && !gameState.isSleeping) {
+                gameState.energy = Math.max(0, gameState.energy - 0.5);
+            }
+        }
+        
+        function updateUI() {
+            // Aktualizuj paski statystyk
+            document.getElementById('hunger-value').textContent = Math.round(gameState.hunger);
+            document.getElementById('hunger-bar').style.width = `${gameState.hunger}%`;
+            
+            document.getElementById('energy-value').textContent = Math.round(gameState.energy);
+            document.getElementById('energy-bar').style.width = `${gameState.energy}%`;
+            
+            document.getElementById('happiness-value').textContent = Math.round(gameState.happiness);
+            document.getElementById('happiness-bar').style.width = `${gameState.happiness}%`;
+            
+            document.getElementById('hygiene-value').textContent = Math.round(gameState.hygiene);
+            document.getElementById('hygiene-bar').style.width = `${gameState.hygiene}%`;
+            
+            document.getElementById('finance-value').textContent = Math.round(gameState.finance);
+            document.getElementById('finance-bar').style.width = `${gameState.finance}%`;
+            
+            // Aktualizuj pieniądze
+            document.getElementById('money').textContent = gameState.money;
+            
+            // Aktualizuj poziomy pokoi
+            document.getElementById('living-room-lvl').textContent = gameState.livingRoomLevel;
+            document.getElementById('kitchen-lvl').textContent = gameState.kitchenLevel;
+            document.getElementById('bedroom-lvl').textContent = gameState.bedroomLevel;
+            document.getElementById('bathroom-lvl').textContent = gameState.bathroomLevel;
+            document.getElementById('garden-lvl').textContent = gameState.gardenLevel;
+            document.getElementById('garage-lvl').textContent = gameState.garageLevel;
+        }
+        
+        function updateCharacterStatus() {
+            const statusElement = document.getElementById('character-status');
+            let status = "Neutralny";
+            
+            if (gameState.happiness > 80) status = "Szczęśliwy";
+            else if (gameState.happiness > 60) status = "Zadowolony";
+            else if (gameState.happiness > 40) status = "Neutralny";
+            else if (gameState.happiness > 20) status = "Smutny";
+            else status = "Przygnębiony";
+            
+            if (gameState.energy < 30) status = "Zmęczony";
+            if (gameState.hunger < 30) status = "Głodny";
+            if (gameState.hygiene < 30) status = "Brudny";
+            
+            statusElement.textContent = status;
+        }
+        
+        function initAudio() {
+            // Tło muzyczne - w rzeczywistej grze tu byłby prawdziwy plik audio
+            const backgroundMusic = document.getElementById('background-music');
+            
+            // Dźwięki efektów - generujemy za pomocą Web Audio API
+            // Przycisk włączania/wyłączania muzyki
+            document.getElementById('music-toggle').addEventListener('click', function() {
+                gameState.musicEnabled = !gameState.musicEnabled;
+                
+                if (gameState.musicEnabled) {
+                    // W rzeczywistej grze: backgroundMusic.play()
+                    this.innerHTML = '<i class="fas fa-music"></i>';
+                    showNotification('Muzyka włączona', 'success');
+                } else {
+                    // W rzeczywistej grze: backgroundMusic.pause()
+                    this.innerHTML = '<i class="fas fa-music-slash"></i>';
+                    showNotification('Muzyka wyłączona', 'info');
+                }
+            });
+            
+            // Przycisk włączania/wyłączania dźwięków
+            document.getElementById('sound-toggle').addEventListener('click', function() {
+                gameState.soundEnabled = !gameState.soundEnabled;
+                
+                if (gameState.soundEnabled) {
+                    this.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    showNotification('Dźwięki włączone', 'success');
+                } else {
+                    this.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    showNotification('Dźwięki wyłączone', 'info');
+                }
+            });
+        }
+        
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            
+            // W rzeczywistej grze tutaj byśmy odtwarzali różne dźwięki
+            // Dla demonstracji używamy prostego systemu notyfikacji
+            const sounds = {
+                eat: '🔊 Odgłos jedzenia',
+                sleep: '🔊 Odgłos chrapania',
+                shower: '🔊 Odgłos wody',
+                work: '🔊 Odgłos pracy',
+                play: '🔊 Odgłos zabawy',
+                upgrade: '🔊 Odgłos ulepszania',
+                money: '🔊 Odgłos monet'
+            };
+            
+            if (sounds[type]) {
+                console.log(sounds[type]);
+            }
+        }
+        
+        function initButtons() {
+            // Przycisk jedzenia
+            document.getElementById('eat-btn').addEventListener('click', eat);
+            document.getElementById('mobile-eat').addEventListener('click', eat);
+            
+            // Przycisk spania
+            document.getElementById('sleep-btn').addEventListener('click', sleep);
+            document.getElementById('mobile-sleep').addEventListener('click', sleep);
+            
+            // Przycisk prysznica
+            document.getElementById('shower-btn').addEventListener('click', shower);
+            document.getElementById('mobile-shower').addEventListener('click', shower);
+            
+            // Przycisk pracy
+            document.getElementById('work-btn').addEventListener('click', work);
+            document.getElementById('mobile-work').addEventListener('click', work);
+            
+            // Przycisk zabawy
+            document.getElementById('play-btn').addEventListener('click', play);
+            document.getElementById('mobile-play').addEventListener('click', play);
+            
+            // Przycisk ulepszania
+            document.getElementById('upgrade-btn').addEventListener('click', openUpgradeMenu);
+            document.getElementById('mobile-upgrade').addEventListener('click', openUpgradeMenu);
+        }
+        
+        function initRooms() {
+            const rooms = document.querySelectorAll('.room');
+            rooms.forEach(room => {
+                room.addEventListener('click', function() {
+                    const roomType = this.dataset.room;
+                    enterRoom(roomType);
+                });
+            });
+        }
+        
+        // Akcje postaci
+        function eat() {
+            if (gameState.isSleeping || gameState.isWorking) {
+                showNotification('Nie możesz jeść teraz!', 'warning');
+                return;
+            }
+            
+            const kitchenBonus = gameState.kitchenLevel * 5;
+            gameState.hunger = Math.min(100, gameState.hunger + 25 + kitchenBonus);
+            gameState.happiness = Math.min(100, gameState.happiness + 5);
+            gameState.money -= 10;
+            
+            playSound('eat');
+            addLogEntry('Zjadłeś posiłek w kuchni.');
+            showNotification('Najedzony! Głód +' + (25 + kitchenBonus), 'success');
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function sleep() {
+            if (gameState.isWorking) {
+                showNotification('Nie możesz spać w pracy!', 'warning');
+                return;
+            }
+            
+            gameState.isSleeping = !gameState.isSleeping;
+            
+            if (gameState.isSleeping) {
+                const bedroomBonus = gameState.bedroomLevel * 8;
+                gameState.energy = Math.min(100, gameState.energy + 40 + bedroomBonus);
+                gameState.hunger = Math.max(0, gameState.hunger - 10);
+                gameState.hygiene = Math.max(0, gameState.hygiene - 5);
+                
+                playSound('sleep');
+                addLogEntry('Położyłeś się spać w sypialni.');
+                showNotification('Śpisz... Energia +' + (40 + bedroomBonus), 'info');
+                
+                // Zmień przycisk na "Obudź się"
+                document.getElementById('sleep-btn').innerHTML = '<i class="fas fa-sun"></i> Obudź się';
+                document.getElementById('mobile-sleep').innerHTML = '<i class="fas fa-sun"></i><span>Obudź się</span>';
+            } else {
+                playSound('sleep');
+                addLogEntry('Obudziłeś się wypoczęty.');
+                showNotification('Dobrze się wyspałeś!', 'success');
+                
+                // Przywróć przycisk
+                document.getElementById('sleep-btn').innerHTML = '<i class="fas fa-bed"></i> Spać';
+                document.getElementById('mobile-sleep').innerHTML = '<i class="fas fa-bed"></i><span>Spać</span>';
+            }
+            
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function shower() {
+            if (gameState.isSleeping || gameState.isWorking) {
+                showNotification('Nie możesz wziąć prysznica teraz!', 'warning');
+                return;
+            }
+            
+            const bathroomBonus = gameState.bathroomLevel * 6;
+            gameState.hygiene = Math.min(100, gameState.hygiene + 35 + bathroomBonus);
+            gameState.energy = Math.max(0, gameState.energy - 5);
+            gameState.happiness = Math.min(100, gameState.happiness + 10);
+            gameState.money -= 5;
+            
+            playSound('shower');
+            addLogEntry('Wziąłeś prysznic w łazience.');
+            showNotification('Czysty i świeży! Higiena +' + (35 + bathroomBonus), 'success');
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function work() {
+            if (gameState.isSleeping) {
+                showNotification('Nie możesz pracować we śnie!', 'warning');
+                return;
+            }
+            
+            gameState.isWorking = !gameState.isWorking;
+            
+            if (gameState.isWorking) {
+                // Rozpoczęcie pracy
+                const garageBonus = gameState.garageLevel * 20;
+                const earnings = 100 + garageBonus;
+                
+                playSound('work');
+                addLogEntry('Poszedłeś do pracy w garażu.');
+                showNotification('Pracujesz... Zarobisz ' + earnings + ' monet', 'info');
+                
+                // Zmień przycisk na "Zakończ pracę"
+                document.getElementById('work-btn').innerHTML = '<i class="fas fa-home"></i> Zakończ pracę';
+                document.getElementById('mobile-work').innerHTML = '<i class="fas fa-home"></i><span>Zakończ pracę</span>';
+                
+                // Symulacja zarabiania po czasie
+                setTimeout(() => {
+                    if (gameState.isWorking) {
+                        gameState.money += earnings;
+                        gameState.finance = Math.min(100, gameState.finance + 10);
+                        gameState.energy = Math.max(0, gameState.energy - 30);
+                        gameState.hunger = Math.max(0, gameState.hunger - 15);
+                        gameState.happiness = Math.max(0, gameState.happiness - 5);
+                        
+                        playSound('money');
+                        addLogEntry('Zarobiłeś ' + earnings + ' monet w pracy.');
+                        showNotification('Zakończyłeś pracę! Zarobiłeś ' + earnings + ' monet', 'success');
+                        
+                        gameState.isWorking = false;
+                        document.getElementById('work-btn').innerHTML = '<i class="fas fa-briefcase"></i> Pracuj';
+                        document.getElementById('mobile-work').innerHTML = '<i class="fas fa-briefcase"></i><span>Pracuj</span>';
+                        
+                        updateUI();
+                        updateCharacterStatus();
+                    }
+                }, 10000); // 10 sekund pracy
+            } else {
+                // Przerwanie pracy
+                gameState.isWorking = false;
+                playSound('work');
+                addLogEntry('Przerwałeś pracę przed czasem.');
+                showNotification('Przerwałeś pracę', 'warning');
+                
+                // Przywróć przycisk
+                document.getElementById('work-btn').innerHTML = '<i class="fas fa-briefcase"></i> Pracuj';
+                document.getElementById('mobile-work').innerHTML = '<i class="fas fa-briefcase"></i><span>Pracuj</span>';
+            }
+            
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function play() {
+            if (gameState.isSleeping || gameState.isWorking) {
+                showNotification('Nie możesz się bawić teraz!', 'warning');
+                return;
+            }
+            
+            const livingRoomBonus = gameState.livingRoomLevel * 7;
+            const gardenBonus = gameState.gardenLevel * 5;
+            const totalBonus = livingRoomBonus + gardenBonus;
+            
+            gameState.happiness = Math.min(100, gameState.happiness + 20 + totalBonus);
+            gameState.energy = Math.max(0, gameState.energy - 15);
+            gameState.hunger = Math.max(0, gameState.hunger - 10);
+            gameState.money -= 5;
+            
+            playSound('play');
+            addLogEntry('Bawiłeś się w salonie i ogrodzie.');
+            showNotification('Dobra zabawa! Szczęście +' + (20 + totalBonus), 'success');
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function enterRoom(roomType) {
+            let message = '';
+            
+            switch(roomType) {
+                case 'living-room':
+                    message = 'Wszedłeś do salonu. Tutaj możesz odpocząć i się bawić.';
+                    gameState.happiness = Math.min(100, gameState.happiness + 5);
+                    break;
+                case 'kitchen':
+                    message = 'Wszedłeś do kuchni. Tutaj możesz przygotować posiłki.';
+                    gameState.hunger = Math.min(100, gameState.hunger + 2);
+                    break;
+                case 'bedroom':
+                    message = 'Wszedłeś do sypialni. Tutaj możesz się wyspać.';
+                    gameState.energy = Math.min(100, gameState.energy + 5);
+                    break;
+                case 'bathroom':
+                    message = 'Wszedłeś do łazienki. Tutaj możesz zadbać o higienę.';
+                    gameState.hygiene = Math.min(100, gameState.hygiene + 5);
+                    break;
+                case 'garden':
+                    message = 'Wszedłeś do ogrodu. Tutaj możesz odpocząć na świeżym powietrzu.';
+                    gameState.happiness = Math.min(100, gameState.happiness + 8);
+                    break;
+                case 'garage':
+                    message = 'Wszedłeś do garażu. Tutaj możesz pracować nad projektami.';
+                    gameState.finance = Math.min(100, gameState.finance + 3);
+                    break;
+            }
+            
+            addLogEntry(message);
+            showNotification(message, 'info');
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function openUpgradeMenu() {
+            // W pełnej wersji gry tutaj byłoby okno z wyborem pokoju do ulepszenia
+            // Dla uproszczenia ulepszamy losowy pokój
+            const rooms = ['livingRoom', 'kitchen', 'bedroom', 'bathroom', 'garden', 'garage'];
+            const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            
+            upgradeRoom(randomRoom);
+        }
+        
+        function upgradeRoom(roomType) {
+            const cost = 500;
+            
+            if (gameState.money < cost) {
+                showNotification('Nie masz wystarczająco monet! Potrzebujesz ' + cost, 'warning');
+                return;
+            }
+            
+            let roomName = '';
+            let currentLevel = 0;
+            
+            switch(roomType) {
+                case 'livingRoom':
+                    gameState.livingRoomLevel++;
+                    currentLevel = gameState.livingRoomLevel;
+                    roomName = 'Salon';
+                    break;
+                case 'kitchen':
+                    gameState.kitchenLevel++;
+                    currentLevel = gameState.kitchenLevel;
+                    roomName = 'Kuchnia';
+                    break;
+                case 'bedroom':
+                    gameState.bedroomLevel++;
+                    currentLevel = gameState.bedroomLevel;
+                    roomName = 'Sypialnia';
+                    break;
+                case 'bathroom':
+                    gameState.bathroomLevel++;
+                    currentLevel = gameState.bathroomLevel;
+                    roomName = 'Łazienka';
+                    break;
+                case 'garden':
+                    gameState.gardenLevel++;
+                    currentLevel = gameState.gardenLevel;
+                    roomName = 'Ogród';
+                    break;
+                case 'garage':
+                    gameState.garageLevel++;
+                    currentLevel = gameState.garageLevel;
+                    roomName = 'Garaż';
+                    break;
+            }
+            
+            gameState.money -= cost;
+            gameState.finance = Math.min(100, gameState.finance + 5);
+            gameState.happiness = Math.min(100, gameState.happiness + 10);
+            
+            playSound('upgrade');
+            addLogEntry('Ulepszyłeś ' + roomName + ' do poziomu ' + currentLevel + ' za ' + cost + ' monet.');
+            showNotification('Ulepszono ' + roomName + ' do poziomu ' + currentLevel + '!', 'success');
+            updateUI();
+            updateCharacterStatus();
+        }
+        
+        function addLogEntry(message) {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<i class="fas fa-info-circle"></i> [${timestamp}] ${message}`;
+            
+            logContainer.prepend(logEntry);
+            
+            // Ogranicz liczbę wpisów w dzienniku
+            if (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+            
+            gameState.logEntries.unshift(`[${timestamp}] ${message}`);
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('i');
+            const content = notification.querySelector('.notification-content');
+            
+            // Ustaw ikonę w zależności od typu
+            notification.className = 'notification';
+            icon.className = 'fas';
+            
+            if (type === 'success') {
+                icon.classList.add('fa-check-circle');
+                notification.classList.add('notification-success');
+            } else if (type === 'warning') {
+                icon.classList.add('fa-exclamation-triangle');
+                notification.classList.add('notification-warning');
+            } else {
+                icon.classList.add('fa-info-circle');
+                notification.classList.add('notification-info');
+            }
+            
+            content.textContent = message;
+            
+            // Pokaż powiadomienie
+            notification.classList.add('show');
+            
+            // Ukryj po 3 sekundach
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Dodaj obsługę klawiszy dla lepszej dostępności
+        document.addEventListener('keydown', function(event) {
+            if (event.key === '1' || event.key === 'e') {
+                eat();
+            } else if (event.key === '2' || event.key === 's') {
+                sleep();
+            } else if (event.key === '3' || event.key === 'p') {
+                shower();
+            } else if (event.key === '4' || event.key === 'w') {
+                work();
+            } else if (event.key === '5' || event.key === 'b') {
+                play();
+            } else if (event.key === '6' || event.key === 'u') {
+                openUpgradeMenu();
+            }
+        });
+    </script>
+</body>
+</html>
